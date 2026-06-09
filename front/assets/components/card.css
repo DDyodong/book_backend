@@ -1,0 +1,151 @@
+/* ==========================
+   card.css
+   공통 카드 스타일
+========================== */
+
+.card {
+  background-color: var(--color-card);
+  border: 2px solid var(--color-line);
+  border-radius: 20px;
+
+  box-shadow: 5px 7px 0 #e7e0d7;
+}
+
+.card-padding {
+  padding: 26px;
+}
+
+.card-title {
+  margin: 0 0 8px;
+
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+.card-desc {
+  margin: 0;
+
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.card-meta {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.card-content {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+/* 도서 카드 공통 */
+.book-card {
+  padding: 18px;
+
+  background-color: var(--color-card);
+  border: 2px solid var(--color-line);
+  border-radius: 18px;
+
+  box-shadow: 4px 6px 0 #e7e0d7;
+}
+
+.book-card-cover {
+  height: 150px;
+
+  background-color: var(--color-soft);
+  border: 2px solid var(--color-line);
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 14px;
+
+  color: var(--color-muted);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.book-card-cover img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.book-card-title {
+  margin: 0 0 6px;
+
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+.book-card-meta {
+  margin: 0;
+
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* 장르 뱃지 */
+.genre-chip {
+  display: inline-block;
+
+  padding: 6px 14px;
+  margin-bottom: 10px;
+
+  border-radius: 999px;
+  background-color: #f3e9c8;
+
+  color: #7c5b08;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* 표지 박스 공통 */
+.cover-box {
+  background-color: var(--color-soft);
+  border: 2px solid var(--color-line);
+  border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.cover-box img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+@media (max-width: 700px) {
+  .card-padding {
+    padding: 22px;
+  }
+
+  .card-header {
+    flex-direction: column;
+  }
+}

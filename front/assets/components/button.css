@@ -1,0 +1,96 @@
+/* ==========================
+   button.css
+   공통 버튼 스타일
+========================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 12px;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn:hover {
+  opacity: 0.88;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* 주요 버튼 */
+.btn-primary {
+  background-color: var(--color-main);
+  color: white;
+}
+
+/* 강조 버튼 */
+.btn-accent {
+  background-color: var(--color-accent);
+  color: #302a1f;
+}
+
+/* 삭제 버튼 */
+.btn-danger {
+  background-color: var(--color-danger);
+  color: white;
+}
+
+/* 취소 버튼 */
+.btn-cancel {
+  background-color: var(--color-soft);
+  color: var(--color-text);
+  border: 1px solid var(--color-line);
+}
+
+/* 연한 버튼 */
+.btn-soft {
+  background-color: var(--color-soft);
+  color: var(--color-text);
+}
+
+/* 작은 버튼 */
+.btn-small {
+  padding: 9px 18px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+
+/* 큰 버튼 */
+.btn-large {
+  padding: 15px 36px;
+  font-size: 16px;
+}
+
+/* 가로 전체 버튼 */
+.btn-full {
+  width: 100%;
+}
+
+/* 버튼 묶음 */
+.button-area {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.button-area-left {
+  justify-content: flex-start;
+}
+
+.button-area-between {
+  justify-content: space-between;
+}
