@@ -1,16 +1,10 @@
 package com.aivle.bookserver.service;
 
-public class BookService {
-
-}
-
-package com.aivle.bookserver.service;
-
 import com.aivle.bookserver.domain.Book;
+import com.aivle.bookserver.exception.BookNotFoundException;
 import com.aivle.bookserver.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,33 +14,37 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
-    // 목록 조회
-    @Transactional(readOnly = true)
-    public List<Book> findAll() {
-        return null;
+    // 전체 도서 조회
+    public List<Book> getBooks() {
+        return bookRepository.findAll();
     }
 
-    // 책 정보 상세 조회 
-    @Transactional(readOnly = true)
-    public Book findById(Long id) {
-        return null;
+    // 단일 도서 조회
+    public Book getBook(Long id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
     }
 
-    // 등록 
-    @Transactional
-    public Book create(Book book) {
-        return null;
+    // 도서 등록
+    public Book createBook(Book book) {
+        return bookRepository.save(book);
     }
 
-    // 책 정보 수정 / 조회수 / 좋아요 통합 처리 
-    @Transactional
-    public Book update(Long id, Book book) {
-        return null;
+    // 도서 수정
+    public Book updateBook(Long id, Book request) {
+        Book book = getBook(id);
+
+        book.setTitle(request.getTitle());
+        book.setContent(request.getContent());
+        book.setGenre(request.getGenre());
+        book.setCoverImageUrl(request.getCoverImageUrl());
+
+        return bookRepository.save(book);
     }
 
-    // 삭제
-    @Transactional
+    // 도서 삭제
     public void deleteBook(Long id) {
+        Book book = getBook(id);
+        bookRepository.delete(book);
     }
-
 }
