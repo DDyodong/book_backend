@@ -34,8 +34,8 @@ public class Book {
     @Column(nullable = false)
     private Integer likes = 0;
 
-    // 조장님이 이미 프로젝트에 다른 엔티티들을 만들어 두셨다면 빨간 줄이 안 뜰 겁니다.
-    // 만약 User, Author, Comment 클래스가 없어서 빨간 줄이 뜨면 이 아랫부분만 잠시 주석(/* */) 처리해 주세요!
+
+     /*User, Author, Comment 클래스 생선 전 주석 처리
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     /*private User user;
