@@ -28,8 +28,11 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public List<Book> getBooks() {
-        return bookService.getBooks();
+    public List<BookResponse> getBooks() {  // ✅ DTO 반환
+        return bookService.getBooks()
+            .stream()
+            .map(BookResponse::from)
+            .toList();
     }
 
     @GetMapping("/{id}")

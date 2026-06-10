@@ -25,24 +25,15 @@ export function getBookById(id) {
 }
 
 export function createBook(bookData) {
-  const now = getTimestamp();
-
-  return request(
-    BASE_URL,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...bookData,
-        coverImageUrl: "",
-        createdAt: now,
-        updatedAt: now,
-        views: 0,
-        likes: 0,
-      }),
-    },
-    "도서 등록에 실패했습니다.",
-  );
+    return request(
+        BASE_URL,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bookData),  // ✅ 서버가 처리
+        },
+        "도서 등록에 실패했습니다.",
+    );
 }
 
 export function viewCounter({ id, currentViews }) {
