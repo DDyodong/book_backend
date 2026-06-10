@@ -21,6 +21,10 @@ spring:
       hibernate:
         format_sql: true
 
+  # Google OAuth는 application-oauth.yaml에 분리했습니다.
+  # 실행 시 oauth 프로필과 GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET 환경변수를 설정하세요.
+  # Google Console 승인된 리디렉션 URI: http://localhost:5173/login/oauth2/code/google
+
 logging:
   level:
     org.hibernate.SQL: debug
