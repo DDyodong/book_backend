@@ -11,6 +11,20 @@ cd ../bookserver
 ./gradlew.bat bootRun
 ```
 
+Google OAuth를 사용할 때는 백엔드를 oauth 프로필로 실행합니다.
+
+```bash
+GOOGLE_CLIENT_ID=구글_클라이언트_ID \
+GOOGLE_CLIENT_SECRET=구글_클라이언트_SECRET \
+./gradlew.bat bootRun --args='--spring.profiles.active=oauth'
+```
+
+Google Console 승인된 리디렉션 URI:
+
+```text
+http://localhost:5173/login/oauth2/code/google
+```
+
 프론트를 실행합니다.
 
 ```bash
