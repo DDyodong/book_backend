@@ -1,10 +1,13 @@
 package com.aivle.bookserver.service;
 
 import com.aivle.bookserver.domain.Book;
+import com.aivle.bookserver.dto.BookCreateRequest;
+import com.aivle.bookserver.dto.BookUpdateRequest;
 import com.aivle.bookserver.exception.BookNotFoundException;
 import com.aivle.bookserver.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,35 +17,61 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
-    // 전체 도서 조회
+    @Transactional(readOnly = true)
     public List<Book> getBooks() {
         return bookRepository.findAll();
     }
 
-    // 단일 도서 조회
+    @Transactional(readOnly = true)
     public Book getBook(Long id) {
         return bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
     }
 
-    // 도서 등록
-    public Book createBook(Book book) {
+    @Transactional
+    public Book createBook(BookCreateRequest request) {
+        Book book = new Book();
+        book.setTitle(request.title());
+        book.setAuthor(request.author());
+        book.setGenre(request.genre());
+        book.setContent(request.content());
+        book.setCoverImageUrl(request.coverImageUrl());
+        book.setViews(0);
+        book.setLikes(0);
+
         return bookRepository.save(book);
     }
 
-    // 도서 수정
-    public Book updateBook(Long id, Book request) {
+    @Transactional
+    public Book updateBook(Long id, BookUpdateRequest request) {
         Book book = getBook(id);
 
-        book.setTitle(request.getTitle());
-        book.setContent(request.getContent());
-        book.setGenre(request.getGenre());
-        book.setCoverImageUrl(request.getCoverImageUrl());
+        if (request.title() != null) {
+            book.setTitle(request.title());
+        }
+        if (request.author() != null) {
+            book.setAuthor(request.author());
+        }
+        if (request.genre() != null) {
+            book.setGenre(request.genre());
+        }
+        if (request.content() != null) {
+            book.setContent(request.content());
+        }
+        if (request.coverImageUrl() != null) {
+            book.setCoverImageUrl(request.coverImageUrl());
+        }
+        if (request.views() != null) {
+            book.setViews(request.views());
+        }
+        if (request.likes() != null) {
+            book.setLikes(request.likes());
+        }
 
-        return bookRepository.save(book);
+        return book;
     }
 
-    // 도서 삭제
+    @Transactional
     public void deleteBook(Long id) {
         Book book = getBook(id);
         bookRepository.delete(book);
