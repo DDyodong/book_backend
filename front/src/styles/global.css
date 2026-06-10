@@ -673,6 +673,39 @@ p {
   text-align: center;
 }
 
+.cover-loading {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2px dashed #d9d0c5;
+  border-radius: 20px;
+  background: #f8f5ef;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.lottie-book {
+  width: 180px;
+  height: 180px;
+}
+
+.cover-loading p {
+  margin: 0;
+  color: var(--forest);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.cover-loading span {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .site-footer {
   border-top: 1px solid var(--line);
   background: #f5efe4;
@@ -868,16 +901,11 @@ p {
   margin-top: 8px;
 }
 
-.comment-actions button,
-.comment-more {
+.comment-actions button {
   border: none;
   background: none;
   cursor: pointer;
   color: #666;
-}
-
-.comment-more {
-  font-size: 22px;
 }
 
 .comment-section {
