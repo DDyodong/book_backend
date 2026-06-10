@@ -1,5 +1,6 @@
 package com.aivle.bookserver.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*; // 검증용 import 추가
 import lombok.*;
@@ -30,7 +31,8 @@ public class Book {
     @Column(length = 1000)
     private String content;
 
-    @Column(length = 5000)
+    @Lob
+    @Column(columnDefinition = "CLOB")
     private String coverImageUrl;
 
     // 장르 리스트를 별도 테이블로 매핑하여 저장
@@ -65,5 +67,23 @@ public class Book {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    @JsonProperty("genre")
+    public List<String> getGenre() {
+        return genres;
+    }
+
+    public void setGenre(List<String> genre) {
+        this.genres = genre;
+    }
+
+    @JsonProperty("likes")
+    public Integer getLikes() {
+        return likesCount;
+    }
+
+    public void setLikes(Integer likes) {
+        this.likesCount = likes;
     }
 }
