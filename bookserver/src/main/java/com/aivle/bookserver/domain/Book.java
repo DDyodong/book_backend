@@ -1,20 +1,8 @@
 package com.aivle.bookserver.domain;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*; // 검증용 import 추가
+import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,27 +18,36 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "제목은 필수입니다.")
     @Column(nullable = false)
     private String title;
 
+    @NotBlank(message = "작성자(Author)는 필수입니다.")
     @Column(nullable = false)
     private String author;
 
+    @Size(max = 1000, message = "내용은 1000자 이내여야 합니다.")
     @Column(length = 1000)
     private String content;
 
     @Column(length = 5000)
     private String coverImageUrl;
 
+    // 장르 리스트를 별도 테이블로 매핑하여 저장
+    @NotEmpty(message = "최소 하나의 장르를 선택해야 합니다.")
     @ElementCollection
-    private List<String> genre = new ArrayList<>();
+    @CollectionTable(name = "book_genres", joinColumns = @JoinColumn(name = "book_id"))
+    @Column(name = "genre")
+    private List<String> genres = new ArrayList<>();
 
     @Column(nullable = false)
     private Integer views = 0;
 
+    // 조장님 피드백: 좋아요 개수 추적용 필드 (성능 최적화용)
     @Column(nullable = false)
-    private Integer likes = 0;
+    private Integer likesCount = 0;
 
+    // 유저별 좋아요 여부 추적 (BookLike 엔티티와 양방향 매핑)
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookLike> bookLikes = new ArrayList<>();
 
