@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/books";
+const BASE_URL = "/api/books";
 
 const getTimestamp = () => new Date().toISOString();
 
