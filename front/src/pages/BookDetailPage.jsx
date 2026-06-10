@@ -3,6 +3,24 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { deleteBook, getBookById, likeCounter, viewCounter } from "@/api/bookApi";
 import BookCover from "@/components/BookCover";
 
+// 쿠키 생성
+const setCookie = (name, value, days) => {
+  const date = new Date();
+  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+};
+
+// 쿠키 읽기 
+const getCookie = (name) => {
+  const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return value ? value[2] : null;
+};
+// 쿠키 삭제
+const deleteCookie = (name) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
+
 function formatDate(date) {
   if (!date) return "-";
 
@@ -84,19 +102,43 @@ function BookDetailPage() {
     });
   }, [comments, sortOption]);
 
-  const handleLike = async () => {
-    if (!book) return;
+  // 1. 상태 추가 (id가 바뀔 때마다 쿠키를 검사해서 초기값 세팅)
+const [isLiked, setIsLiked] = useState(false);
 
-    try {
-      await likeCounter({ id: book.id, currentLikes: book.likes ?? 0 });
-      setBook({
-        ...book,
-        likes: (book.likes ?? 0) + 1,
-      });
-    } catch (likeError) {
-      setError(likeError.message);
+useEffect(() => {
+  if (getCookie(`liked_book_${id}`)) {
+    setIsLiked(true);
+  } else {
+    setIsLiked(false);
+  }
+  // ... 기존 도서 로딩 로직 유지 ...
+}, [id]);
+
+
+// 2. 토글 기능이 적용된 새로운 handleLike
+const handleLike = async () => {
+  if (!book) return;
+  const cookieName = `liked_book_${book.id}`;
+
+  try {
+    if (isLiked) {
+      // [좋아요 취소 로직]
+      // 주의: 백엔드 API가 마이너스 처리(취소)를 지원해야 완벽히 작동합니다.
+      await likeCounter({ id: book.id, currentLikes: book.likes - 1 }); 
+      setBook({ ...book, likes: book.likes - 1 });
+      deleteCookie(cookieName); // 쿠키 파기
+      setIsLiked(false);        // 상태 변경
+    } else {
+      // [좋아요 추가 로직]
+      await likeCounter({ id: book.id, currentLikes: book.likes + 1 });
+      setBook({ ...book, likes: book.likes + 1 });
+      setCookie(cookieName, "true", 365); // 쿠키 굽기
+      setIsLiked(true);                   // 상태 변경
     }
-  };
+  } catch (likeError) {
+    setError(likeError.message);
+  }
+};
 
   const handleCommentSubmit = (event) => {
     event.preventDefault();
@@ -187,9 +229,17 @@ function BookDetailPage() {
             <div><dt>최근 수정</dt><dd>{formatDate(book.updatedAt)}</dd></div>
           </dl>
           <div className="chip-row">
-            <span className="chip">조회수 {book.views ?? 0}</span>
+            {/* 1. 조회수: className을 "chip"에서 "button"으로 변경하여 기준 통일 */}
+            <span 
+              className="button" 
+              style={{ cursor: "default", backgroundColor: "#f0f0f0", color: "#333", border: "none" }}
+            >
+              조회수 {book.views ?? 0}
+            </span>
+            
+            {/* 2. 좋아요: 기존과 동일 */}
             <button className="button" onClick={handleLike}>
-              좋아요 ({book.likes ?? 0})
+              {isLiked ? "❤️ 좋아요" : "♡ 좋아요"} ({book.likes})
             </button>
           </div>
           <div className="description">
