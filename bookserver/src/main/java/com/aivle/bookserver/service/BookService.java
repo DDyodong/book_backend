@@ -46,10 +46,10 @@ public class BookService {
     public Book updateBook(Long id, BookUpdateRequest request) {
         Book book = getBook(id);
 
-        if (request.title() != null) {
+        if (request.title() != null&& !request.title().isBlank()) {
             book.setTitle(request.title());
         }
-        if (request.author() != null) {
+        if (request.author() != null && !request.author().isBlank()) {
             book.setAuthor(request.author());
         }
         if (request.genre() != null) {

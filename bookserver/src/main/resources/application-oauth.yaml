@@ -1,4 +1,9 @@
 spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:bookserver/.env[.properties]
+
   security:
     oauth2:
       client:

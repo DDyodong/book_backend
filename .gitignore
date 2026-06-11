@@ -2,9 +2,11 @@
 ./build/
 **/.gradle/
 **/build/
+**/bin/
 
 .idea/
 *.iml
+*.log
 
 .env
 .env.*
