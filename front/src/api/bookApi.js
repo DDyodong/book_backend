@@ -6,7 +6,18 @@ async function request(url, options, failureMessage) {
   const response = await fetch(url, options);
 
   if (!response.ok) {
-    throw new Error(failureMessage);
+    let serverErrorMessage = "";
+    
+    // 백엔드의 JSON 에러 데이터 파싱
+    try {
+      const errorData = await response.json();
+      serverErrorMessage = errorData.message; 
+    } catch (parseError) {
+      // 서버가 JSON 조차 주지 못하고 죽었을 경우 파싱 에러 무시
+    }
+
+    // 서버 메시지가 있으면 던지고, 없으면 기본 failureMessage를 던짐
+    throw new Error(serverErrorMessage || failureMessage);
   }
 
   if (response.status === 204) {
