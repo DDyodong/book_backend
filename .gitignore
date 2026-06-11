@@ -8,6 +8,8 @@
 *.iml
 *.log
 
+# IntelliJ shared run configurations are stored in .run/*.run.xml.
+
 .env
 .env.*
 !.env.example
