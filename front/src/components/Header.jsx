@@ -43,8 +43,8 @@ function Header() {
         </Link>
         <nav className="site-nav" aria-label="주요 메뉴">
           <NavLink to="/">도서 목록</NavLink>
-          <Link className="button button-primary" to="/create">
-            새 도서 등록
+          <Link className="button button-primary" to="/mypage">
+            My Page
           </Link>
           {!loadingMember && !member && (
             <a className="button button-secondary" href="/oauth2/authorization/google">

@@ -58,17 +58,17 @@ function HomePage() {
     <>
       <section className="hero">
         <div className="container hero-content">
-          <p className="eyebrow">AI BOOK COLLECTION</p>
+          <p className="eyebrow">CREATE YOUR BOOK COVER</p>
           <h1>
-            한 권의 이야기에
+            책의 분위기를 담은
             <br />
-            어울리는 표지를 만드세요.
+            나만의 표지를 완성하세요.
           </h1>
           <p className="hero-copy">
-            도서를 등록하고 OpenAI 이미지 생성 API로 나만의 표지를 완성하는<br />
-            도서관리 시스템입니다.
+            작품의 감성과 어울리는 새로운 표지 디자인을<br />
+            지금 바로 만나보세요.
           </p>
-          <Link className="button button-accent" to="/create">
+          <Link className="button button-accent hero-button" to="/create">
             새 도서 등록하기
           </Link>
         </div>
@@ -76,13 +76,33 @@ function HomePage() {
 
       <section className="rank">
         <div className="container stat-row" aria-label="도서 랭킹">
-          <div>
+          <div className="ranking-card">
+            <span className="ranking-label">
+              조회수 <span className="rank-number">1위</span>
+            </span>
             <strong>{topViewedBooks ? topViewedBooks.title : "-"}</strong>
-            <span>😚 조회수 1위</span>
+            <div className="ranking-sub">
+              <span className="ranking-author">
+                {topViewedBooks ? topViewedBooks.author : "-"}
+              </span>
+              <span className="ranking-meta">
+                조회수 {topViewedBooks ? topViewedBooks.views : 0}
+              </span>
+            </div>
           </div>
-          <div>
+          <div className="ranking-card">
+            <span className="ranking-label like">
+              좋아요 <span className="rank-number">1위</span>
+            </span>
             <strong>{topLikedBooks ? topLikedBooks.title : "-"}</strong>
-            <span>❤️ 좋아요 1위</span>
+            <div className="ranking-sub">
+              <span className="ranking-author">
+                {topLikedBooks ? topLikedBooks.author : "-"}
+              </span>
+              <span className="ranking-meta">
+                좋아요 {topLikedBooks ? topLikedBooks.likes : 0}
+              </span>
+            </div>
           </div>
         </div>
       </section>

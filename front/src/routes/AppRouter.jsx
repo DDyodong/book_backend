@@ -4,6 +4,7 @@ import BookCreatePage from "@/pages/BookCreatePage";
 import BookDetailPage from "@/pages/BookDetailPage";
 import BookEditPage from "@/pages/BookEditPage";
 import HomePage from "@/pages/HomePage";
+import MyPage from "@/pages/MyPage";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
@@ -43,6 +44,7 @@ function AppRouter() {
               <Route path="/books/:id" element={<BookDetailPage />} />
               <Route path="/edit/:id" element={<BookEditPage />} />
               <Route path="/edit/cover/:id" element={<BookCoverPage mode="edit" />} />
+              <Route path="/mypage" element={<MyPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>

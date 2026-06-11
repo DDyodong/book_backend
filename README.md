@@ -28,8 +28,7 @@ book_backend/
 
 1. IntelliJ에서 `bookserver` 폴더를 프로젝트/모듈 기준으로 엽니다.
 2. `bookserver/src/main/java/com/aivle/bookserver/BookserverApplication.java`를 실행합니다.
-3. Google 로그인까지 확인하려면 Run Configuration에서 Active profiles에 `oauth`를 입력합니다.
-4. `bookserver/.env` 파일이 있으면 Google Client ID/Secret은 자동으로 읽습니다.
+3. `bookserver/.env` 파일이 있으면 Google Client ID/Secret과 OpenAI API Key를 자동으로 읽습니다.
 
 중요: IntelliJ Working directory는 `bookserver`로 맞추는 것을 추천합니다. 현재 설정은 repo 루트에서 실행해도 `bookserver/.env`를 읽도록 보완되어 있습니다.
 
@@ -94,7 +93,9 @@ GOOGLE_CLIENT_SECRET=구글_클라이언트_SECRET
 OPENAI_API_KEY=OpenAI_API_KEY
 ```
 
-`application.yaml`에서 `.env`를 자동 import하므로 IntelliJ에서 값을 복사해서 붙여넣지 않아도 됩니다.
+`application.yaml`에서 `.env`를 자동 import하므로 IntelliJ에서 값을 복사해서 붙여넣지 않아도 됩니다. 별도 Active profiles 설정도 필요 없습니다.
+
+`GOOGLE_CLIENT_ID`와 `GOOGLE_CLIENT_SECRET`이 모두 있으면 Google OAuth 로그인이 활성화됩니다.
 
 `OPENAI_API_KEY`는 AI 표지 생성 API에서 서버가 사용합니다. 프론트 화면에는 API Key 입력칸이 없고, 브라우저에 키가 노출되지 않습니다.
 

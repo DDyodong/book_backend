@@ -132,6 +132,8 @@ p {
 .site-nav {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 25px;
   color: var(--muted);
   font-weight: 600;
@@ -208,10 +210,18 @@ p {
 
 .hero {
   overflow: hidden;
-  border-bottom: 1px solid var(--line);
+  padding: 72px 0 88px;
   background:
-    radial-gradient(circle at 82% 38%, rgba(197, 141, 61, 0.17), transparent 25%),
-    linear-gradient(120deg, #f5edde, #fcfaf3);
+    radial-gradient(circle at 85% 20%, rgba(205, 151, 61, 0.16), transparent 32%),
+    linear-gradient(180deg, #fbf6ea 0%, #f8f1e4 100%);
+  border-bottom: 1px solid var(--line);
+}
+
+.hero .eyebrow {
+  color: #9a6720;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
 }
 
 .hero-content {
@@ -219,19 +229,30 @@ p {
 }
 
 .hero h1 {
-  margin-bottom: 18px;
-  color: #241f1a;
-  font-family: Georgia, "Batang", serif;
-  font-size: clamp(42px, 5.5vw, 64px);
+  margin: 22px 0 24px;
+  color: #211b16;
+  font-family: "Noto Serif KR", "Nanum Myeongjo", Georgia, "Batang", serif;
+  font-size: clamp(52px, 7vw, 86px);
   font-weight: 700;
-  line-height: 1.17;
+  line-height: 1.18;
 }
 
 .hero-copy {
-  max-width: 510px;
+  max-width: 640px;
   margin-bottom: 34px;
-  color: var(--muted);
-  font-size: 17px;
+  color: #6f6254;
+  font-size: 22px;
+  line-height: 1.75;
+}
+
+.hero-button {
+  background: linear-gradient(135deg, #2f6b52, #1f4f3d);
+  color: #fff;
+  box-shadow: 0 12px 26px rgba(31, 79, 61, 0.25);
+}
+
+.hero-button:hover:not(:disabled) {
+  box-shadow: 0 16px 32px rgba(168, 107, 31, 0.32);
 }
 
 .stat-row {
@@ -240,7 +261,7 @@ p {
   border-top: 1px solid var(--line);
 }
 
-.stat-row div {
+.stat-row > div {
   display: flex;
   min-width: 150px;
   align-items: center;
@@ -250,12 +271,60 @@ p {
   margin-right: 28px;
 }
 
+.ranking-card {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ranking-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f7d774, #f0b84d);
+  padding: 6px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 10px rgba(240, 184, 77, 0.25);
+}
+
+.ranking-label.like {
+  background: linear-gradient(135deg, #d89c6a, #b96f49);
+}
+
+.rank-number {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.55);
+}
+
+.ranking-sub {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ranking-author {
+  color: #7b6d5d;
+  font-size: 15px;
+}
+
+.ranking-meta {
+  color: #5f5548;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .stat-row strong {
   color: var(--forest);
   font-size: 27px;
 }
 
-.stat-row span {
+.stat-row > div > span:not(.ranking-label) {
   color: var(--muted);
   font-size: 14px;
 }
@@ -423,6 +492,70 @@ p {
 
 .page-section {
   padding: 54px 0 76px;
+}
+
+.my-page-panel {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 34px;
+}
+
+.my-page-empty {
+  text-align: center;
+}
+
+.my-page-empty h2 {
+  margin-bottom: 10px;
+  font-size: 26px;
+}
+
+.my-page-empty p {
+  margin-bottom: 22px;
+  color: var(--muted);
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.profile-avatar {
+  display: grid;
+  width: 82px;
+  height: 82px;
+  flex: 0 0 82px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--forest);
+  color: #fff;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+img.profile-avatar {
+  display: block;
+  object-fit: cover;
+}
+
+.profile-content {
+  min-width: 0;
+}
+
+.profile-content h2 {
+  margin: 10px 0 4px;
+  font-size: 30px;
+}
+
+.profile-content p {
+  color: var(--muted);
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
 }
 
 .page-heading {
@@ -770,10 +903,16 @@ p {
     flex-direction: column;
   }
 
-  .stat-row div {
+  .stat-row > div {
     border-right: 0;
     padding: 13px 0;
     margin: 0;
+  }
+
+  .ranking-sub,
+  .profile-card {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .filters select {
@@ -846,6 +985,11 @@ p {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+img.comment-avatar {
+  display: block;
+  object-fit: cover;
 }
 
 .comment-input-box {

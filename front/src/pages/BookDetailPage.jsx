@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getCurrentMember } from "@/api/authApi";
 import { createComment, deleteBook, getBookById, getComments, likeCounter, viewCounter } from "@/api/bookApi";
@@ -55,6 +55,21 @@ function getInitial(name) {
   return (name || "회").trim().charAt(0).toUpperCase();
 }
 
+function ProfileAvatar({ imageUrl, name }) {
+  if (imageUrl) {
+    return (
+      <img
+        className="comment-avatar"
+        src={imageUrl}
+        alt=""
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+
+  return <div className="comment-avatar">{getInitial(name)}</div>;
+}
+
 function BookDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -109,56 +124,51 @@ function BookDetailPage() {
     setIsLiked(Boolean(getCookie(`liked_book_${id}`)));
   }, [id]);
 
-  useEffect(() => {
-    let ignore = false;
-
-    async function loadComments() {
-      try {
-        setCommentError("");
-        const fetchedComments = await getComments(id);
-        if (!ignore) {
-          setComments(fetchedComments);
-        }
-      } catch (loadError) {
-        if (!ignore) {
-          setCommentError(loadError.message);
-        }
+  const loadComments = useCallback(async ({ showError = true } = {}) => {
+    try {
+      if (showError) setCommentError("");
+      const fetchedComments = await getComments(id);
+      setComments(fetchedComments);
+    } catch (loadError) {
+      if (showError) {
+        setCommentError(loadError.message);
       }
     }
-
-    loadComments();
-
-    return () => {
-      ignore = true;
-    };
   }, [id]);
 
-  useEffect(() => {
-    let ignore = false;
-
-    async function loadMember() {
-      try {
-        const currentMember = await getCurrentMember();
-        if (!ignore) {
-          setMember(currentMember);
-        }
-      } catch {
-        if (!ignore) {
-          setMember(null);
-        }
-      } finally {
-        if (!ignore) {
-          setLoadingMember(false);
-        }
-      }
+  const loadMember = useCallback(async () => {
+    try {
+      const currentMember = await getCurrentMember();
+      setMember(currentMember);
+    } catch {
+      setMember(null);
+    } finally {
+      setLoadingMember(false);
     }
-
-    loadMember();
-
-    return () => {
-      ignore = true;
-    };
   }, []);
+
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
+
+  useEffect(() => {
+    loadMember();
+  }, [loadMember]);
+
+  useEffect(() => {
+    const refreshAuthState = () => {
+      if (document.visibilityState === "hidden") return;
+      loadMember();
+      loadComments({ showError: false });
+    };
+
+    window.addEventListener("focus", refreshAuthState);
+    document.addEventListener("visibilitychange", refreshAuthState);
+    return () => {
+      window.removeEventListener("focus", refreshAuthState);
+      document.removeEventListener("visibilitychange", refreshAuthState);
+    };
+  }, [loadComments, loadMember]);
 
   const sortedComments = useMemo(() => {
     return [...comments].sort((a, b) => {
@@ -210,8 +220,10 @@ function BookDetailPage() {
       setSubmittingComment(true);
       setCommentError("");
       const newComment = await createComment(id, commentText.trim());
-      setComments([newComment, ...comments]);
+      setComments((currentComments) => [newComment, ...currentComments]);
       setCommentText("");
+      await loadMember();
+      await loadComments({ showError: false });
     } catch (submitError) {
       setCommentError(submitError.message);
     } finally {
@@ -324,7 +336,7 @@ function BookDetailPage() {
         </div>
 
         <form className="comment-form" onSubmit={handleCommentSubmit}>
-          <div className="comment-avatar">{getInitial(getMemberDisplayName(member))}</div>
+          <ProfileAvatar imageUrl={member?.profileImageUrl} name={getMemberDisplayName(member)} />
           <div className="comment-input-box">
             <div className="comment-writer">
               <strong>{member ? getMemberDisplayName(member) : "로그인이 필요합니다"}</strong>
@@ -360,7 +372,7 @@ function BookDetailPage() {
         <div className="comment-list">
           {sortedComments.map((comment) => (
             <div className="comment-item" key={comment.id}>
-              <div className="comment-avatar">{getInitial(comment.memberName)}</div>
+              <ProfileAvatar imageUrl={comment.memberProfileImageUrl} name={comment.memberName} />
               <div className="comment-body">
                 <div className="comment-meta">
                   <strong>{comment.memberName}</strong>

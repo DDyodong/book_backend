@@ -26,8 +26,8 @@ spring:
       hibernate:
         format_sql: true
 
-  # Google OAuth 설정은 application-oauth.yaml에 분리되어 있습니다.
-  # 실행 시 oauth 프로필을 활성화하면 bookserver/.env 값을 자동으로 읽습니다.
+  # Google OAuth와 OpenAI 설정은 bookserver/.env 값을 자동으로 읽습니다.
+  # GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET이 있으면 Google OAuth가 활성화됩니다.
   # Google Console 승인된 리디렉션 URI: http://localhost:8080/login/oauth2/code/google
 
 logging:

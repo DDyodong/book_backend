@@ -12,6 +12,7 @@ public record CommentResponse(
         LocalDateTime createdAt,
         Long memberId,
         String memberName,
+        String memberProfileImageUrl,
         String memberRole,
         String memberRoleLabel
 ) {
@@ -26,6 +27,7 @@ public record CommentResponse(
                 member.getNickname() != null && !member.getNickname().isBlank()
                         ? member.getNickname()
                         : member.getEmail(),
+                member.getProfileImageUrl(),
                 role.name(),
                 roleLabel(role)
         );
