@@ -8,6 +8,9 @@
 *.iml
 *.log
 
+# npm은 front 폴더에서만 실행합니다. repo 루트에서 생기는 lock 파일은 실수로 생성된 파일입니다.
+/package-lock.json
+
 # IntelliJ shared run configurations are stored in .run/*.run.xml.
 
 .env

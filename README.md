@@ -33,6 +33,15 @@ book_backend/
 
 중요: IntelliJ Working directory는 `bookserver`로 맞추는 것을 추천합니다. 현재 설정은 repo 루트에서 실행해도 `bookserver/.env`를 읽도록 보완되어 있습니다.
 
+### Git Bash 추천 방식
+
+```bash
+cd "/c/Users/User/Documents/Prj 1/book_backend/bookserver"
+./gradlew.bat bootRun
+```
+
+Windows에서 `bash` 명령이 WSL로 잡히는 경우가 있습니다. 그럴 때는 시작 메뉴에서 Git Bash를 직접 열거나, 터미널에서 `"C:\Program Files\Git\bin\bash.exe"`를 지정해서 실행합니다.
+
 ### CMD 또는 PowerShell
 
 ```powershell
@@ -53,14 +62,17 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 npm.cmd run dev
 ```
 
-### Git Bash
+## 프론트 실행
+
+### Git Bash 추천 방식
 
 ```bash
-cd "/c/Users/User/Documents/Prj 1/book_backend/bookserver"
-./gradlew.bat bootRun
+cd "/c/Users/User/Documents/Prj 1/book_backend/front"
+npm install
+npm run dev
 ```
 
-## 프론트 실행
+주의: npm 명령은 반드시 `front` 폴더 안에서 실행합니다. repo 루트에서 `npm install`을 실행하면 불필요한 `package-lock.json`이 생길 수 있습니다.
 
 ### CMD 또는 PowerShell
 
@@ -68,14 +80,6 @@ cd "/c/Users/User/Documents/Prj 1/book_backend/bookserver"
 cd "C:\Users\User\Documents\Prj 1\book_backend\front"
 npm.cmd install
 npm.cmd run dev
-```
-
-### Git Bash
-
-```bash
-cd "/c/Users/User/Documents/Prj 1/book_backend/front"
-npm install
-npm run dev
 ```
 
 실행 후 브라우저에서 `http://localhost:5173`으로 접속합니다.

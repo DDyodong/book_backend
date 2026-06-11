@@ -4,7 +4,6 @@ import com.aivle.bookserver.dto.CoverGenerateRequest;
 import com.aivle.bookserver.dto.CoverGenerateResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,12 +17,10 @@ import java.net.http.HttpResponse;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class OpenAiImageService {
 
     private static final URI IMAGE_GENERATION_URI = URI.create("https://api.openai.com/v1/images/generations");
-
-    private final ObjectMapper objectMapper;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Value("${OPENAI_API_KEY:}")
     private String openAiApiKey;
@@ -37,7 +34,7 @@ public class OpenAiImageService {
         }
 
         try {
-            String requestBody = objectMapper.writeValueAsString(Map.of(
+            String requestBody = OBJECT_MAPPER.writeValueAsString(Map.of(
                     "model", "gpt-image-2",
                     "prompt", request.prompt().trim(),
                     "n", 1,
@@ -55,7 +52,7 @@ public class OpenAiImageService {
             HttpResponse<String> response = HttpClient.newHttpClient()
                     .send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-            JsonNode responseJson = objectMapper.readTree(response.body());
+            JsonNode responseJson = OBJECT_MAPPER.readTree(response.body());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 String message = responseJson.path("error").path("message").asText("표지 이미지 생성에 실패했습니다.");
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, message);
