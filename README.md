@@ -87,9 +87,12 @@ npm run dev
 ```properties
 GOOGLE_CLIENT_ID=구글_클라이언트_ID
 GOOGLE_CLIENT_SECRET=구글_클라이언트_SECRET
+OPENAI_API_KEY=OpenAI_API_KEY
 ```
 
-`application-oauth.yaml`에서 `.env`를 자동 import하므로 IntelliJ에서 값을 복사해서 붙여넣지 않아도 됩니다.
+`application.yaml`에서 `.env`를 자동 import하므로 IntelliJ에서 값을 복사해서 붙여넣지 않아도 됩니다.
+
+`OPENAI_API_KEY`는 AI 표지 생성 API에서 서버가 사용합니다. 프론트 화면에는 API Key 입력칸이 없고, 브라우저에 키가 노출되지 않습니다.
 
 Google Cloud Console 승인된 리디렉션 URI는 아래 주소를 등록합니다.
 

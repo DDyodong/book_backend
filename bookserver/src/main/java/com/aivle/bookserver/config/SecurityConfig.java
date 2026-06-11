@@ -27,7 +27,10 @@ public class SecurityConfig {
                                 "/api/books/**",
                                 "/api/members/me"
                         ).permitAll()
-                        .requestMatchers("/api/members/me/author-request").authenticated()
+                        .requestMatchers(
+                                "/api/covers/**",
+                                "/api/members/me/author-request"
+                        ).authenticated()
                         .anyRequest().permitAll()
                 )
                 .logout(logout -> logout

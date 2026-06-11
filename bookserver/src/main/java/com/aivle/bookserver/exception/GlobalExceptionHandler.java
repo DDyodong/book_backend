@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -33,5 +34,15 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> handleResponseStatus(ResponseStatusException e) {
+        Map<String, String> body = Map.of(
+                "error", e.getStatusCode().toString(),
+                "message", e.getReason() == null ? "요청을 처리하지 못했습니다." : e.getReason()
+        );
+
+        return ResponseEntity.status(e.getStatusCode()).body(body);
     }
 }

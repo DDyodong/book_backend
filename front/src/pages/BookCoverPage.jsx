@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { generateCover } from "@/api/coverApi";
 import { getBookById, updateBook } from "@/api/bookApi";
 import BookCover from "@/components/BookCover";
 import Loading from "@/components/Loading";
@@ -15,12 +16,12 @@ function buildPrompt(book) {
     `"${book.title}"라는 제목의 한국어 도서 표지를 만들어줘. 저자는 "${book.author}"이다.`,
     `장르는 ${genres}이다.`,
     `줄거리 및 핵심 내용: ${book.content}`,
-    `이 이미지는 단순한 분위기 이미지가 아니라, 실제 출판용 느낌의 완성된 책 표지 디자인이어야 한다.`,
+    "이 이미지는 단순한 분위기 이미지가 아니라, 실제 출판용 느낌의 완성된 책 표지 디자인이어야 한다.",
     `표지에는 책 제목 "${book.title}"이 반드시 정확하게 포함되어야 하며, 눈에 잘 띄고 읽기 쉽게 표시되어야 한다.`,
-    `책 제목은 크고 선명하며 또렷한 글자로 표현해줘.`,
+    "책 제목은 크고 선명하며 또렷한 글자로 표현해줘.",
     `가능하면 저자명 "${book.author}"도 표지에 자연스럽게 포함해줘.`,
-    `전체적으로 한국 출판 도서 표지처럼 세련되고 완성도 높게 디자인해줘.`,
-    `세로형 책 표지 구도, 앞표지 기준, 분위기 있는 조명, 높은 퀄리티의 일러스트, 정제된 타이포그래피와 시각적 스토리텔링을 반영해줘.`,
+    "전체적으로 한국 출판 도서 표지처럼 세련되고 완성도 높게 디자인해줘.",
+    "세로형 책 표지 구도, 앞표지 기준, 분위기 있는 조명, 높은 퀄리티의 일러스트, 정제된 타이포그래피와 시각적 스토리텔링을 반영해줘.",
   ].join("\n");
 }
 
@@ -67,7 +68,6 @@ function BookCoverPage({ mode }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [book, setBook] = useState(null);
-  const [apiKey, setApiKey] = useState("");
   const [prompt, setPrompt] = useState("");
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [status, setStatus] = useState("idle");
@@ -89,10 +89,6 @@ function BookCoverPage({ mode }) {
   }, [id]);
 
   const handleGenerate = async () => {
-    if (!apiKey.trim()) {
-      setError("OpenAI API Key를 입력해주세요.");
-      return;
-    }
     if (!prompt.trim()) {
       setError("표지 생성 프롬프트를 입력해주세요.");
       return;
@@ -103,32 +99,12 @@ function BookCoverPage({ mode }) {
       setGeneratedUrl("");
       setError("");
 
-      const response = await fetch("https://api.openai.com/v1/images/generations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey.trim()}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-image-2",
-          prompt: prompt.trim(),
-          n: 1,
-          size: "1024x1536",
-          quality: "medium",
-          output_format: "png",
-        }),
-      });
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => null);
-        throw new Error(result?.error?.message || "표지 이미지 생성에 실패했습니다.");
+      const result = await generateCover(prompt.trim());
+      if (!result.imageDataUrl) {
+        throw new Error("생성된 이미지 데이터를 받지 못했습니다.");
       }
 
-      const result = await response.json();
-      const base64Image = result.data?.[0]?.b64_json;
-      if (!base64Image) throw new Error("생성된 이미지 데이터를 받지 못했습니다.");
-
-      setGeneratedUrl(`data:image/png;base64,${base64Image}`);
+      setGeneratedUrl(result.imageDataUrl);
       setStatus("done");
     } catch (generateError) {
       setError(generateError.message);
@@ -172,23 +148,13 @@ function BookCoverPage({ mode }) {
       <div className="generator-layout">
         <div className="panel prompt-panel">
           <label className="field">
-            <span>OpenAI API Key <strong>필수</strong></span>
-            <input
-              type="password"
-              autoComplete="off"
-              placeholder="sk-..."
-              value={apiKey}
-              onChange={(event) => setApiKey(event.target.value)}
-            />
-            <small className="field-help">입력한 키는 브라우저에 저장되지 않습니다.</small>
-          </label>
-          <label className="field">
             <span>표지 생성 프롬프트 <strong>수정 가능</strong></span>
             <textarea
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
-              rows="13"
+              rows="16"
             />
+            <small className="field-help">OpenAI API Key는 서버의 .env에서 사용되며 브라우저에 노출되지 않습니다.</small>
           </label>
           {error && <p className="form-message error">{error}</p>}
           <button className="button button-primary button-wide" onClick={handleGenerate} disabled={status === "loading"}>
