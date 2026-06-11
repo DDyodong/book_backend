@@ -3,6 +3,7 @@ package com.aivle.bookserver.controller;
 import com.aivle.bookserver.domain.AuthorRequest;
 import com.aivle.bookserver.domain.Member;
 import com.aivle.bookserver.dto.AuthorRequestResponse;
+import com.aivle.bookserver.dto.BookResponse;
 import com.aivle.bookserver.dto.MemberResponse;
 import com.aivle.bookserver.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/members")
@@ -37,4 +40,17 @@ public class MemberController {
         AuthorRequest request = memberService.requestAuthor(member);
         return AuthorRequestResponse.from(request);
     }
+
+    @GetMapping("/me/liked-books")
+    public List<BookResponse> getLikedBooks(Authentication authentication) {
+        Member member = memberService.findCurrentMember(authentication)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        return memberService.getLikedBooks(member)
+                .stream()
+                .map(BookResponse::from)
+                .toList();
+
+    }
+
+    
 }

@@ -1,121 +1,138 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { getCurrentMember, requestAuthorRole } from "@/api/authApi";
+import { Link, useNavigate } from "react-router-dom";
+import { getCurrentMember, getLikedBooks } from "@/api/authApi";
+import BookCard from "@/components/BookCard";
 
-function roleLabel(role) {
-  if (role === "ADMIN") return "관리자";
-  if (role === "AUTHOR") return "저자";
-  return "기본 회원";
-}
+function MyPage() {
+  const navigate = useNavigate();
+  const [member, setMember] = useState(null);
+  const [likedBooks, setLikedBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-function ProfileAvatar({ member }) {
-  if (member.profileImageUrl) {
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadData() {
+      try {
+        setError("");
+        const memberData = await getCurrentMember();
+
+        if (!memberData) {
+          navigate("/");
+          return;
+        }
+
+        if (!ignore) {
+          setMember(memberData);
+        }
+
+        const booksData = await getLikedBooks();
+        if (!ignore) {
+          setLikedBooks(booksData || []);
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setError(loadError.message);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadData();
+
+    return () => {
+      ignore = true;
+    };
+  }, [navigate]);
+
+  if (loading) {
+    return <div className="container page-state">마이페이지를 불러오는 중입니다.</div>;
+  }
+
+  if (error) {
     return (
-      <img
-        className="profile-avatar"
-        src={member.profileImageUrl}
-        alt=""
-        referrerPolicy="no-referrer"
-      />
+      <div className="container page-state error">
+        <p>{error}</p>
+        <Link className="button button-secondary" to="/">목록으로 돌아가기</Link>
+      </div>
     );
   }
 
   return (
-    <div className="profile-avatar" aria-hidden="true">
-      {(member.nickname || member.email || "U").slice(0, 1).toUpperCase()}
-    </div>
-  );
-}
+    <>
+      <section className="hero mypage-hero">
+        <div className="container hero-content">
+          <p className="eyebrow">MY PAGE</p>
+          <h1>마이페이지</h1>
+          {member && (
+            <p className="hero-copy">
+              환영합니다, <strong>{member.nickname || member.email}</strong>님!
+            </p>
+          )}
+        </div>
+      </section>
 
-function MyPage() {
-  const [member, setMember] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [requestingAuthor, setRequestingAuthor] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    async function loadMember() {
-      try {
-        setError("");
-        setMember(await getCurrentMember());
-      } catch (loadError) {
-        setError(loadError.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadMember();
-  }, []);
-
-  const handleAuthorRequest = async () => {
-    try {
-      setRequestingAuthor(true);
-      setError("");
-      await requestAuthorRole();
-      setMember(await getCurrentMember());
-    } catch (requestError) {
-      setError(requestError.message);
-    } finally {
-      setRequestingAuthor(false);
-    }
-  };
-
-  return (
-    <section className="container page-section my-page">
-      <div className="page-heading">
-        <p className="eyebrow">MY PAGE</p>
-        <h1>내 계정</h1>
-        <p>Google 로그인 정보와 저자 권한 상태를 확인합니다.</p>
-      </div>
-
-      <div className="panel my-page-panel">
-        {loading && <div className="state-card">로그인 정보를 불러오는 중입니다.</div>}
-        {!loading && error && <div className="state-card error">{error}</div>}
-
-        {!loading && !member && (
-          <div className="my-page-empty">
-            <h2>로그인이 필요합니다</h2>
-            <p>Google 계정으로 로그인하면 댓글 작성과 저자 신청을 사용할 수 있습니다.</p>
-            <a className="button button-primary" href="/oauth2/authorization/google">
-              Google 로그인
-            </a>
+      <section className="container collection-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">PROFILE</p>
+            <h2>프로필</h2>
           </div>
-        )}
+        </div>
 
-        {!loading && member && (
-          <div className="profile-card">
-            <ProfileAvatar member={member} />
+        {member && (
+          <div className="panel profile-panel">
             <div className="profile-content">
-              <span className={`role-badge ${member.role === "AUTHOR" ? "role-author" : ""} ${member.role === "ADMIN" ? "role-admin" : ""}`}>
-                {roleLabel(member.role)}
-              </span>
-              <h2>{member.nickname || "이름 없음"}</h2>
-              <p>{member.email}</p>
-
-              <div className="profile-actions">
-                {member.role !== "AUTHOR" && member.role !== "ADMIN" && (
-                  <button
-                    className="button button-primary"
-                    type="button"
-                    onClick={handleAuthorRequest}
-                    disabled={requestingAuthor}
-                  >
-                    {requestingAuthor ? "신청 중..." : "저자 신청"}
-                  </button>
+              <div className="profile-avatar">
+                {member.profileImageUrl ? (
+                  <img src={member.profileImageUrl} alt={member.nickname || member.email} />
+                ) : (
+                  <div className="avatar-placeholder">{(member.nickname || member.email).charAt(0).toUpperCase()}</div>
                 )}
-                <Link className="button button-secondary" to="/">
-                  도서 목록으로
-                </Link>
-                <a className="button button-ghost" href="/logout">
-                  로그아웃
-                </a>
+              </div>
+              <div className="profile-info">
+                <h3>{member.nickname || member.email}</h3>
+                <p>{member.email}</p>
+                <div className="profile-meta">
+                  <span className={`role-badge role-${member.role?.toLowerCase()}`}>
+                    {member.role === "AUTHOR" && "저자"}
+                    {member.role === "ADMIN" && "관리자"}
+                    {member.role === "USER" && "회원"}
+                  </span>
+                  <span className="provider-badge">Google 계정</span>
+                </div>
               </div>
             </div>
           </div>
         )}
-      </div>
-    </section>
+      </section>
+
+      <section className="container collection-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">FAVORITES</p>
+            <h2>좋아요 목록</h2>
+          </div>
+          <p>{likedBooks.length}권 저장됨</p>
+        </div>
+
+        {likedBooks.length === 0 ? (
+          <div className="state-card">
+            <h3>아직 좋아요한 책이 없습니다</h3>
+            <p>마음에 드는 책을 찾아 좋아요를 눌러보세요.</p>
+            <Link className="button button-primary" to="/">도서 목록 보기</Link>
+          </div>
+        ) : (
+          <div className="book-grid">
+            {likedBooks.map((book) => <BookCard key={book.id} book={book} />)}
+          </div>
+        )}
+      </section>
+    </>
   );
 }
 

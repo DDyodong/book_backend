@@ -2,9 +2,11 @@ package com.aivle.bookserver.service;
 
 import com.aivle.bookserver.domain.AuthorRequest;
 import com.aivle.bookserver.domain.AuthorRequestStatus;
+import com.aivle.bookserver.domain.Book;
 import com.aivle.bookserver.domain.Member;
 import com.aivle.bookserver.domain.MemberRole;
 import com.aivle.bookserver.repository.AuthorRequestRepository;
+import com.aivle.bookserver.repository.BookLikeRepository;
 import com.aivle.bookserver.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,6 +26,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final AuthorRequestRepository authorRequestRepository;
+    private final BookLikeRepository bookLikeRepository;
 
     @Transactional
     public Member saveOrUpdateGoogleMember(OAuth2User user) {
@@ -68,5 +72,10 @@ public class MemberService {
         request.setReviewedAt(LocalDateTime.now());
 
         return authorRequestRepository.save(request);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Book> getLikedBooks(Member member) {
+        return bookLikeRepository.findLikedBooksByMemberId(member.getId());
     }
 }

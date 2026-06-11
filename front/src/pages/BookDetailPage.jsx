@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getCurrentMember } from "@/api/authApi";
-import { createComment, deleteBook, getBookById, getComments, likeCounter, viewCounter } from "@/api/bookApi";
+import { createComment, deleteBook, getBookById, getComments, viewCounter,deleteBookLike, saveBookLike } from "@/api/bookApi";
 import BookCover from "@/components/BookCover";
 
 const setCookie = (name, value, days) => {
@@ -184,28 +184,36 @@ function BookDetailPage() {
     });
   }, [comments, sortOption]);
 
-  const handleLike = async () => {
-    if (!book) return;
-    const cookieName = `liked_book_${book.id}`;
+const handleLike = async () => {
+  if (!book) return;
 
-    try {
-      if (isLiked) {
-        const nextLikes = Math.max((book.likes ?? 0) - 1, 0);
-        await likeCounter({ id: book.id, currentLikes: nextLikes });
-        setBook({ ...book, likes: nextLikes });
-        deleteCookie(cookieName);
-        setIsLiked(false);
-      } else {
-        const nextLikes = (book.likes ?? 0) + 1;
-        await likeCounter({ id: book.id, currentLikes: nextLikes });
-        setBook({ ...book, likes: nextLikes });
-        setCookie(cookieName, "true", 365);
-        setIsLiked(true);
-      }
-    } catch (likeError) {
-      setError(likeError.message);
+  const cookieName = `liked_book_${book.id}`;
+
+  try {
+    if (isLiked) {
+
+      await deleteBookLike(book.id);
+
+      const updatedBook = await getBookById(book.id);
+      setBook(updatedBook);
+
+      deleteCookie(cookieName);
+      setIsLiked(false);
+
+    } else {
+
+      await saveBookLike(book.id);
+
+      const updatedBook = await getBookById(book.id);
+      setBook(updatedBook);
+
+      setCookie(cookieName, "true", 365);
+      setIsLiked(true);
     }
-  };
+  } catch (likeError) {
+    console.error(likeError);
+  }
+};
 
   const handleCommentSubmit = async (event) => {
     event.preventDefault();

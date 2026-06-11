@@ -43,8 +43,8 @@ function Header() {
         </Link>
         <nav className="site-nav" aria-label="주요 메뉴">
           <NavLink to="/">도서 목록</NavLink>
-          <Link className="button button-primary" to="/mypage">
-            My Page
+          <Link className="button button-primary" to="/create">
+            새 도서 등록
           </Link>
           {!loadingMember && !member && (
             <a className="button button-secondary" href="/oauth2/authorization/google">
@@ -53,6 +53,9 @@ function Header() {
           )}
           {!loadingMember && member && (
             <>
+              <Link to="/my-page" className="button button-secondary">
+                마이페이지
+              </Link>
               <span className="chip">{member.nickname || member.email}</span>
               {member.role !== "AUTHOR" && member.role !== "ADMIN" && (
                 <button

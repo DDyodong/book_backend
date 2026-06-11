@@ -8,7 +8,7 @@ spring:
     name: bookserver
 
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:file:./data/bookdb
     driver-class-name: org.h2.Driver
     username: sa
     password:

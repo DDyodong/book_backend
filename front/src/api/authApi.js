@@ -24,3 +24,7 @@ export function requestAuthorRole() {
     method: "POST",
   });
 }
+
+export function getLikedBooks() {
+  return request("/api/members/me/liked-books");
+}

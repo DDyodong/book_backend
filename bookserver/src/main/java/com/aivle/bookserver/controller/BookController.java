@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -57,6 +58,24 @@ public class BookController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likeBook(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        bookService.likeBook(id, authentication);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Void> unlikeBook(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        bookService.unlikeBook(id, authentication);
         return ResponseEntity.noContent().build();
     }
 }

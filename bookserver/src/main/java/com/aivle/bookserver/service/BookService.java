@@ -1,13 +1,17 @@
 package com.aivle.bookserver.service;
 
 import com.aivle.bookserver.domain.Book;
+import com.aivle.bookserver.domain.BookLike;
 import com.aivle.bookserver.dto.BookCreateRequest;
 import com.aivle.bookserver.dto.BookUpdateRequest;
 import com.aivle.bookserver.exception.BookNotFoundException;
+import com.aivle.bookserver.repository.BookLikeRepository;
 import com.aivle.bookserver.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import com.aivle.bookserver.domain.Member;
 
 import java.util.List;
 
@@ -16,6 +20,8 @@ import java.util.List;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BookLikeRepository bookLikeRepository;
+    private final MemberService memberService;
 
     @Transactional(readOnly = true)
     public List<Book> getBooks() {
@@ -76,4 +82,47 @@ public class BookService {
         Book book = getBook(id);
         bookRepository.delete(book);
     }
+
+    @Transactional
+    public void likeBook(Long bookId, Authentication authentication) {
+
+        Member member = memberService.findCurrentMember(authentication)
+                .orElseThrow();
+
+        Book book = getBook(bookId);
+
+        if (bookLikeRepository.existsByMemberIdAndBookId(
+                member.getId(),
+                bookId)) {
+            return;
+        }
+
+        BookLike bookLike = new BookLike();
+        bookLike.setBook(book);
+        bookLike.setMember(member);
+
+        bookLikeRepository.save(bookLike);
+
+        book.setLikes(book.getLikes() + 1);
+    }
+
+    @Transactional
+    public void unlikeBook(Long bookId, Authentication authentication) {
+
+        Member member = memberService.findCurrentMember(authentication)
+                .orElseThrow();
+
+        BookLike like = bookLikeRepository
+                .findByMemberIdAndBookId(member.getId(), bookId)
+                .orElseThrow();
+
+        bookLikeRepository.delete(like);
+
+        Book book = getBook(bookId);
+
+        book.setLikes(
+                Math.max(book.getLikes() - 1, 0)
+        );
+    }
+
 }

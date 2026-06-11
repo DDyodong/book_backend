@@ -3,12 +3,11 @@ import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-do
 import BookCreatePage from "@/pages/BookCreatePage";
 import BookDetailPage from "@/pages/BookDetailPage";
 import BookEditPage from "@/pages/BookEditPage";
+import BookCoverPage from "@/pages/BookCoverPage";
 import HomePage from "@/pages/HomePage";
 import MyPage from "@/pages/MyPage";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-
-const BookCoverPage = lazy(() => import("@/pages/BookCoverPage"));
 
 function NotFoundPage() {
   return (
@@ -39,12 +38,12 @@ function AppRouter() {
           <Suspense fallback={<div className="container page-state">화면을 불러오는 중입니다.</div>}>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/my-page" element={<MyPage />} />
               <Route path="/create" element={<BookCreatePage />} />
               <Route path="/create/cover/:id" element={<BookCoverPage mode="create" />} />
               <Route path="/books/:id" element={<BookDetailPage />} />
               <Route path="/edit/:id" element={<BookEditPage />} />
               <Route path="/edit/cover/:id" element={<BookCoverPage mode="edit" />} />
-              <Route path="/mypage" element={<MyPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>

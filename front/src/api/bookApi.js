@@ -63,19 +63,24 @@ export function viewCounter({ id, currentViews }) {
   );
 }
 
-export function likeCounter({ id, currentLikes }) {
-  
+export function saveBookLike(id) {
   return request(
-    `${BASE_URL}/${id}`,
+    `${BASE_URL}/${id}/like`,
     {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        likes: currentLikes,
-        updatedAt: getTimestamp(),
-      }),
+      method: "POST",
+      credentials: "include",
     },
-    "좋아요 업데이트에 실패했습니다.",
+    "좋아요 저장에 실패했습니다.",
+  );
+}
+
+export function deleteBookLike(id) {
+  return request(
+    `${BASE_URL}/${id}/like`,
+    {
+      method: "DELETE",
+    },
+    "좋아요 취소에 실패했습니다."
   );
 }
 
