@@ -865,6 +865,25 @@ p {
   font-size: 15px;
 }
 
+.comment-input-box textarea:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.comment-writer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.comment-error {
+  margin: 6px 0 0;
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .comment-form-footer {
   display: flex;
   justify-content: flex-end;
@@ -886,6 +905,8 @@ p {
 
 .comment-meta {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   color: #777;
   margin-bottom: 6px;
@@ -931,4 +952,28 @@ p {
 
 .comment-like-button.active {
   font-weight: 700;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #f7f1e7;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.role-author {
+  border-color: rgba(197, 141, 61, 0.35);
+  background: #fff5df;
+  color: var(--gold-dark);
+}
+
+.role-admin {
+  border-color: rgba(38, 77, 64, 0.3);
+  background: #eaf4ef;
+  color: var(--forest);
 }

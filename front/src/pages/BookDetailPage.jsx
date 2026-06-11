@@ -1,25 +1,23 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { deleteBook, getBookById, likeCounter, viewCounter } from "@/api/bookApi";
+import { getCurrentMember } from "@/api/authApi";
+import { createComment, deleteBook, getBookById, getComments, likeCounter, viewCounter } from "@/api/bookApi";
 import BookCover from "@/components/BookCover";
 
-// 쿠키 생성
 const setCookie = (name, value, days) => {
   const date = new Date();
-  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
   document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
 };
 
-// 쿠키 읽기 
 const getCookie = (name) => {
-  const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  const value = document.cookie.match(`(^|;) ?${name}=([^;]*)(;|$)`);
   return value ? value[2] : null;
 };
-// 쿠키 삭제
+
 const deleteCookie = (name) => {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 };
-
 
 function formatDate(date) {
   if (!date) return "-";
@@ -43,6 +41,20 @@ function getTimeAgo(createdAt) {
   return `${diffDays}일 전`;
 }
 
+function getMemberDisplayName(member) {
+  return member?.nickname || member?.email || "회원";
+}
+
+function getRoleLabel(role) {
+  if (role === "AUTHOR") return "저자";
+  if (role === "ADMIN") return "관리자";
+  return "회원";
+}
+
+function getInitial(name) {
+  return (name || "회").trim().charAt(0).toUpperCase();
+}
+
 function BookDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -53,6 +65,11 @@ function BookDetailPage() {
   const [commentText, setCommentText] = useState("");
   const [sortOption, setSortOption] = useState("latest");
   const [comments, setComments] = useState([]);
+  const [member, setMember] = useState(null);
+  const [loadingMember, setLoadingMember] = useState(true);
+  const [commentError, setCommentError] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -88,6 +105,61 @@ function BookDetailPage() {
     };
   }, [id]);
 
+  useEffect(() => {
+    setIsLiked(Boolean(getCookie(`liked_book_${id}`)));
+  }, [id]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadComments() {
+      try {
+        setCommentError("");
+        const fetchedComments = await getComments(id);
+        if (!ignore) {
+          setComments(fetchedComments);
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setCommentError(loadError.message);
+        }
+      }
+    }
+
+    loadComments();
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadMember() {
+      try {
+        const currentMember = await getCurrentMember();
+        if (!ignore) {
+          setMember(currentMember);
+        }
+      } catch {
+        if (!ignore) {
+          setMember(null);
+        }
+      } finally {
+        if (!ignore) {
+          setLoadingMember(false);
+        }
+      }
+    }
+
+    loadMember();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   const sortedComments = useMemo(() => {
     return [...comments].sort((a, b) => {
       if (sortOption === "oldest") {
@@ -95,67 +167,56 @@ function BookDetailPage() {
       }
 
       if (sortOption === "likes") {
-        return b.likes - a.likes;
+        return (b.likes ?? 0) - (a.likes ?? 0);
       }
 
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
   }, [comments, sortOption]);
 
-  // 1. 상태 추가 (id가 바뀔 때마다 쿠키를 검사해서 초기값 세팅)
-const [isLiked, setIsLiked] = useState(false);
+  const handleLike = async () => {
+    if (!book) return;
+    const cookieName = `liked_book_${book.id}`;
 
-useEffect(() => {
-  if (getCookie(`liked_book_${id}`)) {
-    setIsLiked(true);
-  } else {
-    setIsLiked(false);
-  }
-  // ... 기존 도서 로딩 로직 유지 ...
-}, [id]);
-
-
-// 2. 토글 기능이 적용된 새로운 handleLike
-const handleLike = async () => {
-  if (!book) return;
-  const cookieName = `liked_book_${book.id}`;
-
-  try {
-    if (isLiked) {
-      // [좋아요 취소 로직]
-      // 주의: 백엔드 API가 마이너스 처리(취소)를 지원해야 완벽히 작동합니다.
-      await likeCounter({ id: book.id, currentLikes: book.likes - 1 }); 
-      setBook({ ...book, likes: book.likes - 1 });
-      deleteCookie(cookieName); // 쿠키 파기
-      setIsLiked(false);        // 상태 변경
-    } else {
-      // [좋아요 추가 로직]
-      await likeCounter({ id: book.id, currentLikes: book.likes + 1 });
-      setBook({ ...book, likes: book.likes + 1 });
-      setCookie(cookieName, "true", 365); // 쿠키 굽기
-      setIsLiked(true);                   // 상태 변경
+    try {
+      if (isLiked) {
+        const nextLikes = Math.max((book.likes ?? 0) - 1, 0);
+        await likeCounter({ id: book.id, currentLikes: nextLikes });
+        setBook({ ...book, likes: nextLikes });
+        deleteCookie(cookieName);
+        setIsLiked(false);
+      } else {
+        const nextLikes = (book.likes ?? 0) + 1;
+        await likeCounter({ id: book.id, currentLikes: nextLikes });
+        setBook({ ...book, likes: nextLikes });
+        setCookie(cookieName, "true", 365);
+        setIsLiked(true);
+      }
+    } catch (likeError) {
+      setError(likeError.message);
     }
-  } catch (likeError) {
-    setError(likeError.message);
-  }
-};
+  };
 
-  const handleCommentSubmit = (event) => {
+  const handleCommentSubmit = async (event) => {
     event.preventDefault();
 
     if (!commentText.trim()) return;
+    if (!member) {
+      setCommentError("Google 로그인 후 댓글을 등록할 수 있습니다.");
+      return;
+    }
 
-    const newComment = {
-      id: Date.now(),
-      userName: "방문자",
-      content: commentText.trim(),
-      createdAt: new Date().toISOString(),
-      likes: 0,
-      isLiked: false,
-    };
-
-    setComments([newComment, ...comments]);
-    setCommentText("");
+    try {
+      setSubmittingComment(true);
+      setCommentError("");
+      const newComment = await createComment(id, commentText.trim());
+      setComments([newComment, ...comments]);
+      setCommentText("");
+    } catch (submitError) {
+      setCommentError(submitError.message);
+    } finally {
+      setSubmittingComment(false);
+    }
   };
 
   const handleCommentLike = (commentId) => {
@@ -165,7 +226,7 @@ const handleLike = async () => {
           ? {
               ...comment,
               isLiked: !comment.isLiked,
-              likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
+              likes: comment.isLiked ? (comment.likes ?? 0) - 1 : (comment.likes ?? 0) + 1,
             }
           : comment,
       ),
@@ -229,15 +290,12 @@ const handleLike = async () => {
             <div><dt>최근 수정</dt><dd>{formatDate(book.updatedAt)}</dd></div>
           </dl>
           <div className="chip-row">
-            {/* 1. 조회수: className을 "chip"에서 "button"으로 변경하여 기준 통일 */}
-            <span 
-              className="button" 
+            <span
+              className="button"
               style={{ cursor: "default", backgroundColor: "#f0f0f0", color: "#333", border: "none" }}
             >
               조회수 {book.views ?? 0}
             </span>
-            
-            {/* 2. 좋아요: 기존과 동일 */}
             <button className="button" onClick={handleLike}>
               {isLiked ? "❤️ 좋아요" : "♡ 좋아요"} ({book.likes})
             </button>
@@ -266,17 +324,35 @@ const handleLike = async () => {
         </div>
 
         <form className="comment-form" onSubmit={handleCommentSubmit}>
-          <div className="comment-avatar">방</div>
+          <div className="comment-avatar">{getInitial(getMemberDisplayName(member))}</div>
           <div className="comment-input-box">
+            <div className="comment-writer">
+              <strong>{member ? getMemberDisplayName(member) : "로그인이 필요합니다"}</strong>
+              {member && (
+                <span className={`role-badge role-${member.role?.toLowerCase()}`}>
+                  {getRoleLabel(member.role)}
+                </span>
+              )}
+            </div>
             <textarea
               value={commentText}
               onChange={(event) => setCommentText(event.target.value)}
-              placeholder="댓글을 입력해주세요..."
+              placeholder={member ? "댓글을 입력해주세요..." : "Google 로그인 후 댓글을 작성할 수 있습니다."}
               maxLength={500}
+              disabled={!member || submittingComment || loadingMember}
             />
+            {commentError && <p className="comment-error">{commentError}</p>}
             <div className="comment-form-footer">
               <span>{commentText.length} / 500</span>
-              <button className="button" type="submit">등록</button>
+              {member ? (
+                <button className="button" type="submit" disabled={submittingComment || !commentText.trim()}>
+                  {submittingComment ? "등록 중..." : "등록"}
+                </button>
+              ) : (
+                <a className="button button-secondary" href="/oauth2/authorization/google">
+                  Google 로그인
+                </a>
+              )}
             </div>
           </div>
         </form>
@@ -284,10 +360,13 @@ const handleLike = async () => {
         <div className="comment-list">
           {sortedComments.map((comment) => (
             <div className="comment-item" key={comment.id}>
-              <div className="comment-avatar">방</div>
+              <div className="comment-avatar">{getInitial(comment.memberName)}</div>
               <div className="comment-body">
                 <div className="comment-meta">
-                  <strong>{comment.userName}</strong>
+                  <strong>{comment.memberName}</strong>
+                  <span className={`role-badge role-${comment.memberRole?.toLowerCase()}`}>
+                    {comment.memberRoleLabel || getRoleLabel(comment.memberRole)}
+                  </span>
                   <span>{getTimeAgo(comment.createdAt)}</span>
                 </div>
                 <p>{comment.content}</p>
@@ -298,7 +377,7 @@ const handleLike = async () => {
                     className={`comment-like-button ${comment.isLiked ? "active" : ""}`}
                     onClick={() => handleCommentLike(comment.id)}
                   >
-                    좋아요 {comment.likes}
+                    좋아요 {comment.likes ?? 0}
                   </button>
                 </div>
               </div>

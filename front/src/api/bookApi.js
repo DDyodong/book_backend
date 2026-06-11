@@ -71,7 +71,7 @@ export function likeCounter({ id, currentLikes }) {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        likes: currentLikes + 1,
+        likes: currentLikes,
         updatedAt: getTimestamp(),
       }),
     },
@@ -99,5 +99,26 @@ export async function deleteBook(id) {
     `${BASE_URL}/${id}`,
     { method: "DELETE" },
     "도서 삭제에 실패했습니다.",
+  );
+}
+
+export function getComments(bookId) {
+  return request(
+    `${BASE_URL}/${bookId}/comments`,
+    { credentials: "same-origin" },
+    "댓글을 불러오지 못했습니다.",
+  );
+}
+
+export function createComment(bookId, content) {
+  return request(
+    `${BASE_URL}/${bookId}/comments`,
+    {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    },
+    "댓글 등록에 실패했습니다.",
   );
 }

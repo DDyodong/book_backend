@@ -1,8 +1,7 @@
 package com.aivle.bookserver.controller;
 
-import com.aivle.bookserver.domain.Book;
 import com.aivle.bookserver.dto.BookCreateRequest;
-import com.aivle.bookserver.dto.BookResponse;      // ← 추가
+import com.aivle.bookserver.dto.BookResponse;
 import com.aivle.bookserver.dto.BookUpdateRequest;
 import com.aivle.bookserver.service.BookService;
 import jakarta.validation.Valid;
@@ -29,30 +28,30 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public List<BookResponse> getBooks() {  // ✅ DTO 반환
+    public List<BookResponse> getBooks() {
         return bookService.getBooks()
-            .stream()
-            .map(BookResponse::from)
-            .toList();
+                .stream()
+                .map(BookResponse::from)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Book getBook(@PathVariable Long id) {
-        return bookService.getBook(id);
+    public BookResponse getBook(@PathVariable Long id) {
+        return BookResponse.from(bookService.getBook(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Book createBook(@Valid @RequestBody BookCreateRequest request) {
-        return bookService.createBook(request);
+    public BookResponse createBook(@Valid @RequestBody BookCreateRequest request) {
+        return BookResponse.from(bookService.createBook(request));
     }
 
     @PatchMapping("/{id}")
-    public Book updateBook(
+    public BookResponse updateBook(
             @PathVariable Long id,
             @Valid @RequestBody BookUpdateRequest request
     ) {
-        return bookService.updateBook(id, request);
+        return BookResponse.from(bookService.updateBook(id, request));
     }
 
     @DeleteMapping("/{id}")
