@@ -2,6 +2,7 @@ package com.aivle.bookserver.controller;
 
 import com.aivle.bookserver.domain.Book;
 import com.aivle.bookserver.dto.BookCreateRequest;
+import com.aivle.bookserver.dto.BookResponse;      // ← 추가
 import com.aivle.bookserver.dto.BookUpdateRequest;
 import com.aivle.bookserver.service.BookService;
 import jakarta.validation.Valid;
