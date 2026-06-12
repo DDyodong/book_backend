@@ -4,11 +4,14 @@ import com.aivle.bookserver.domain.AuthorRequest;
 import com.aivle.bookserver.domain.Member;
 import com.aivle.bookserver.dto.AuthorRequestResponse;
 import com.aivle.bookserver.dto.BookResponse;
+import com.aivle.bookserver.dto.DemoRoleRequest;
 import com.aivle.bookserver.dto.MemberResponse;
 import com.aivle.bookserver.service.MemberService;
+import org.springframework.web.bind.annotation.PatchMapping;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,5 +55,12 @@ public class MemberController {
 
     }
 
-    
+    @PatchMapping("/me/demo-role")
+    public MemberResponse updateDemoRole(
+            Authentication authentication,
+            @RequestBody DemoRoleRequest request
+    ) {
+        Member member = memberService.requireCurrentMember(authentication);
+        return MemberResponse.from(memberService.updateDemoAuthorRole(member, request.authorEnabled()));
+    }
 }

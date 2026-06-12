@@ -3,7 +3,10 @@ const BASE_URL = "/api/books";
 const getTimestamp = () => new Date().toISOString();
 
 async function request(url, options, failureMessage) {
-  const response = await fetch(url, options);
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    ...options,
+  });
 
   if (!response.ok) {
     let serverErrorMessage = "";
@@ -50,13 +53,12 @@ export function createBook(bookData) {
 export function viewCounter({ id, currentViews }) {
 
   return request(
-    `${BASE_URL}/${id}`,
+    `${BASE_URL}/${id}/views`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        views: currentViews + 1,
-        updatedAt: getTimestamp(),
+        value: currentViews + 1,
       }),
     },
     "조회수 업데이트에 실패했습니다.",
@@ -68,7 +70,6 @@ export function saveBookLike(id) {
     `${BASE_URL}/${id}/like`,
     {
       method: "POST",
-      credentials: "include",
     },
     "좋아요 저장에 실패했습니다.",
   );

@@ -279,24 +279,30 @@ const handleLike = async () => {
     );
   }
 
+  const canManageBook = member?.role === "AUTHOR" || member?.role === "ADMIN";
+
   return (
     <section className="container page-section detail-page">
       <div className="detail-toolbar">
         <Link className="back-link" to="/">목록으로</Link>
-        <div className="action-row">
-          <Link className="button button-secondary" to={`/edit/${id}`}>정보 수정</Link>
-          <button className="button button-danger" onClick={handleDelete} disabled={deleting}>
-            {deleting ? "삭제 중..." : "삭제"}
-          </button>
-        </div>
+        {canManageBook && (
+          <div className="action-row">
+            <Link className="button button-secondary" to={`/edit/${id}`}>정보 수정</Link>
+            <button className="button button-danger" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "삭제 중..." : "삭제"}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="detail-layout">
         <div className="cover-column">
           <BookCover book={book} className="detail-cover" />
-          <Link className="button button-accent button-wide" to={`/edit/cover/${id}`}>
-            AI 표지 {book.coverImageUrl ? "재생성" : "생성"}하기
-          </Link>
+          {canManageBook && (
+            <Link className="button button-accent button-wide" to={`/edit/cover/${id}`}>
+              AI 표지 {book.coverImageUrl ? "재생성" : "생성"}하기
+            </Link>
+          )}
         </div>
 
         <article className="panel detail-content">

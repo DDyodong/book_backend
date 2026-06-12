@@ -1,9 +1,11 @@
 package com.aivle.bookserver.controller;
 
 import com.aivle.bookserver.dto.BookCreateRequest;
+import com.aivle.bookserver.dto.BookCounterRequest;
 import com.aivle.bookserver.dto.BookResponse;
 import com.aivle.bookserver.dto.BookUpdateRequest;
 import com.aivle.bookserver.service.BookService;
+import com.aivle.bookserver.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
+    private final MemberService memberService;
 
     @GetMapping
     public List<BookResponse> getBooks() {
@@ -43,20 +46,46 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookResponse createBook(@Valid @RequestBody BookCreateRequest request) {
+    public BookResponse createBook(
+            @Valid @RequestBody BookCreateRequest request,
+            Authentication authentication
+    ) {
+        memberService.requireAuthor(authentication);
         return BookResponse.from(bookService.createBook(request));
     }
 
     @PatchMapping("/{id}")
     public BookResponse updateBook(
             @PathVariable Long id,
-            @Valid @RequestBody BookUpdateRequest request
+            @Valid @RequestBody BookUpdateRequest request,
+            Authentication authentication
     ) {
+        memberService.requireAuthor(authentication);
         return BookResponse.from(bookService.updateBook(id, request));
     }
 
+    @PatchMapping("/{id}/views")
+    public BookResponse updateViews(
+            @PathVariable Long id,
+            @RequestBody BookCounterRequest request
+    ) {
+        return BookResponse.from(bookService.updateViews(id, request.value()));
+    }
+
+    @PatchMapping("/{id}/likes")
+    public BookResponse updateLikes(
+            @PathVariable Long id,
+            @RequestBody BookCounterRequest request
+    ) {
+        return BookResponse.from(bookService.updateLikes(id, request.value()));
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBook(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        memberService.requireAuthor(authentication);
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
     }

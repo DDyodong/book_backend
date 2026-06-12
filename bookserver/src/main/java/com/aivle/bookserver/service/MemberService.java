@@ -11,8 +11,10 @@ import com.aivle.bookserver.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,9 +63,26 @@ public class MemberService {
         return memberRepository.findByProviderAndProviderId(GOOGLE, providerId);
     }
 
+    @Transactional(readOnly = true)
+    public Member requireCurrentMember(Authentication authentication) {
+        return findCurrentMember(authentication)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Google 로그인 후 이용할 수 있습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public Member requireAuthor(Authentication authentication) {
+        Member member = requireCurrentMember(authentication);
+        if (member.getRole() != MemberRole.AUTHOR && member.getRole() != MemberRole.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "저자 권한이 있어야 도서를 작성할 수 있습니다.");
+        }
+
+        return member;
+    }
+
     @Transactional
     public AuthorRequest requestAuthor(Member member) {
         member.setRole(MemberRole.AUTHOR);
+        memberRepository.save(member);
 
         AuthorRequest request = new AuthorRequest();
         request.setMember(member);
@@ -77,5 +96,15 @@ public class MemberService {
     @Transactional(readOnly = true)
     public List<Book> getLikedBooks(Member member) {
         return bookLikeRepository.findLikedBooksByMemberId(member.getId());
+    }
+
+    @Transactional
+    public Member updateDemoAuthorRole(Member member, boolean authorEnabled) {
+        if (member.getRole() == MemberRole.ADMIN) {
+            return member;
+        }
+
+        member.setRole(authorEnabled ? MemberRole.AUTHOR : MemberRole.USER);
+        return memberRepository.save(member);
     }
 }

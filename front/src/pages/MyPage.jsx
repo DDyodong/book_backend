@@ -1,13 +1,35 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getCurrentMember, getLikedBooks } from "@/api/authApi";
+import { getCurrentMember, getLikedBooks, requestAuthorRole } from "@/api/authApi";
+import { getBooks } from "@/api/bookApi";
 import BookCard from "@/components/BookCard";
+import { emitMemberChange } from "@/components/DemoToolbar";
+
+function roleLabel(role) {
+  if (role === "ADMIN") return "관리자";
+  if (role === "AUTHOR") return "저자";
+  return "회원";
+}
+
+function ProfileAvatar({ member }) {
+  if (member.profileImageUrl) {
+    return <img src={member.profileImageUrl} alt={member.nickname || member.email} />;
+  }
+
+  return (
+    <div className="avatar-placeholder">
+      {(member.nickname || member.email || "?").charAt(0).toUpperCase()}
+    </div>
+  );
+}
 
 function MyPage() {
   const navigate = useNavigate();
   const [member, setMember] = useState(null);
   const [likedBooks, setLikedBooks] = useState([]);
+  const [authorBooks, setAuthorBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [requestingAuthor, setRequestingAuthor] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -27,9 +49,9 @@ function MyPage() {
           setMember(memberData);
         }
 
-        const booksData = await getLikedBooks();
+        const likedBooksData = await getLikedBooks();
         if (!ignore) {
-          setLikedBooks(booksData || []);
+          setLikedBooks(likedBooksData || []);
         }
       } catch (loadError) {
         if (!ignore) {
@@ -42,18 +64,57 @@ function MyPage() {
       }
     }
 
+    const handleMemberChange = (event) => {
+      setMember(event.detail?.member ?? null);
+      setLoading(false);
+    };
+
     loadData();
+    window.addEventListener("member-state-change", handleMemberChange);
 
     return () => {
       ignore = true;
+      window.removeEventListener("member-state-change", handleMemberChange);
     };
   }, [navigate]);
+
+  useEffect(() => {
+    async function loadAuthorBooks() {
+      if (member?.role !== "AUTHOR" && member?.role !== "ADMIN") {
+        setAuthorBooks([]);
+        return;
+      }
+
+      try {
+        setAuthorBooks(await getBooks());
+      } catch {
+        setAuthorBooks([]);
+      }
+    }
+
+    loadAuthorBooks();
+  }, [member]);
+
+  const handleAuthorRequest = async () => {
+    try {
+      setRequestingAuthor(true);
+      setError("");
+      await requestAuthorRole();
+      const updatedMember = await getCurrentMember();
+      setMember(updatedMember);
+      emitMemberChange(updatedMember);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setRequestingAuthor(false);
+    }
+  };
 
   if (loading) {
     return <div className="container page-state">마이페이지를 불러오는 중입니다.</div>;
   }
 
-  if (error) {
+  if (error && !member) {
     return (
       <div className="container page-state error">
         <p>{error}</p>
@@ -63,55 +124,53 @@ function MyPage() {
   }
 
   return (
-    <>
-      <section className="hero mypage-hero">
-        <div className="container hero-content">
-          <p className="eyebrow">MY PAGE</p>
-          <h1>마이페이지</h1>
-          {member && (
-            <p className="hero-copy">
-              환영합니다, <strong>{member.nickname || member.email}</strong>님!
-            </p>
-          )}
-        </div>
-      </section>
+    <section className="container page-section my-page">
+      <div className="page-heading">
+        <p className="eyebrow">MY PAGE</p>
+        <h1>내 계정</h1>
+        <p>Google 로그인 정보와 저장한 도서, 저자 권한 상태를 확인합니다.</p>
+      </div>
 
-      <section className="container collection-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">PROFILE</p>
-            <h2>프로필</h2>
-          </div>
-        </div>
+      {error && <div className="state-card error">{error}</div>}
 
-        {member && (
-          <div className="panel profile-panel">
-            <div className="profile-content">
-              <div className="profile-avatar">
-                {member.profileImageUrl ? (
-                  <img src={member.profileImageUrl} alt={member.nickname || member.email} />
-                ) : (
-                  <div className="avatar-placeholder">{(member.nickname || member.email).charAt(0).toUpperCase()}</div>
-                )}
-              </div>
-              <div className="profile-info">
-                <h3>{member.nickname || member.email}</h3>
-                <p>{member.email}</p>
-                <div className="profile-meta">
-                  <span className={`role-badge role-${member.role?.toLowerCase()}`}>
-                    {member.role === "AUTHOR" && "저자"}
-                    {member.role === "ADMIN" && "관리자"}
-                    {member.role === "USER" && "회원"}
-                  </span>
-                  <span className="provider-badge">Google 계정</span>
-                </div>
+      {member && (
+        <div className="panel profile-panel">
+          <div className="profile-content">
+            <div className="profile-avatar">
+              <ProfileAvatar member={member} />
+            </div>
+            <div className="profile-info">
+              <h3>{member.nickname || member.email}</h3>
+              <p>{member.email}</p>
+              <div className="profile-meta">
+                <span className={`role-badge role-${member.role?.toLowerCase()}`}>
+                  {roleLabel(member.role)}
+                </span>
+                <span className="provider-badge">Google 계정</span>
               </div>
             </div>
           </div>
-        )}
-      </section>
 
-      <section className="container collection-section">
+          {member.role !== "AUTHOR" && member.role !== "ADMIN" && (
+            <button
+              className="button button-primary"
+              type="button"
+              onClick={handleAuthorRequest}
+              disabled={requestingAuthor}
+            >
+              {requestingAuthor ? "신청 중..." : "저자 신청하기"}
+            </button>
+          )}
+
+          {(member.role === "AUTHOR" || member.role === "ADMIN") && (
+            <Link className="button button-primary" to="/create">
+              새 도서 등록
+            </Link>
+          )}
+        </div>
+      )}
+
+      <section className="collection-section mypage-section">
         <div className="section-heading">
           <div>
             <p className="eyebrow">FAVORITES</p>
@@ -132,7 +191,38 @@ function MyPage() {
           </div>
         )}
       </section>
-    </>
+
+      {member && (member.role === "AUTHOR" || member.role === "ADMIN") && (
+        <section className="panel author-library-panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">AUTHOR LIBRARY</p>
+              <h2>내 도서 관리</h2>
+            </div>
+            <Link className="button button-primary" to="/create">새 도서 등록</Link>
+          </div>
+
+          {authorBooks.length === 0 ? (
+            <div className="state-card">아직 등록된 도서가 없습니다.</div>
+          ) : (
+            <div className="author-book-list">
+              {authorBooks.map((book) => (
+                <article className="author-book-row" key={book.id}>
+                  <div>
+                    <strong>{book.title}</strong>
+                    <span>{book.author} · 조회수 {book.views ?? 0} · 좋아요 {book.likes ?? 0}</span>
+                  </div>
+                  <div className="author-book-actions">
+                    <Link className="button button-secondary" to={`/books/${book.id}`}>상세</Link>
+                    <Link className="button button-primary" to={`/edit/${book.id}`}>수정</Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+    </section>
   );
 }
 

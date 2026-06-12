@@ -28,3 +28,11 @@ export function requestAuthorRole() {
 export function getLikedBooks() {
   return request("/api/members/me/liked-books");
 }
+
+export function updateDemoAuthorRole(authorEnabled) {
+  return request("/api/members/me/demo-role", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ authorEnabled }),
+  });
+}

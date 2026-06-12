@@ -6,6 +6,7 @@ import BookEditPage from "@/pages/BookEditPage";
 import BookCoverPage from "@/pages/BookCoverPage";
 import HomePage from "@/pages/HomePage";
 import MyPage from "@/pages/MyPage";
+import DemoToolbar from "@/components/DemoToolbar";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
@@ -34,6 +35,7 @@ function AppRouter() {
       <div className="app-shell">
         <ScrollToTop />
         <Header />
+        <DemoToolbar />
         <main className="site-main">
           <Suspense fallback={<div className="container page-state">화면을 불러오는 중입니다.</div>}>
             <Routes>

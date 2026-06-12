@@ -78,6 +78,26 @@ public class BookService {
     }
 
     @Transactional
+    public Book updateViews(Long id, Integer views) {
+        Book book = getBook(id);
+        if (views != null) {
+            book.setViews(Math.max(views, 0));
+        }
+
+        return book;
+    }
+
+    @Transactional
+    public Book updateLikes(Long id, Integer likes) {
+        Book book = getBook(id);
+        if (likes != null) {
+            book.setLikes(Math.max(likes, 0));
+        }
+
+        return book;
+    }
+
+    @Transactional
     public void deleteBook(Long id) {
         Book book = getBook(id);
         bookRepository.delete(book);

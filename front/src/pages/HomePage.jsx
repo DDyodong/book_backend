@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { getCurrentMember } from "@/api/authApi";
 import { getBooks } from "@/api/bookApi";
 import BookCard from "@/components/BookCard";
 
@@ -9,6 +10,7 @@ function HomePage() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [genre, setGenre] = useState("전체");
+  const [member, setMember] = useState(null);
 
   useEffect(() => {
     async function loadBooks() {
@@ -23,6 +25,29 @@ function HomePage() {
     }
 
     loadBooks();
+  }, []);
+
+  useEffect(() => {
+    async function loadMember() {
+      try {
+        setMember(await getCurrentMember());
+      } catch {
+        setMember(null);
+      }
+    }
+
+    const handleMemberChange = (event) => {
+      setMember(event.detail?.member ?? null);
+    };
+
+    loadMember();
+    window.addEventListener("focus", loadMember);
+    window.addEventListener("member-state-change", handleMemberChange);
+
+    return () => {
+      window.removeEventListener("focus", loadMember);
+      window.removeEventListener("member-state-change", handleMemberChange);
+    };
   }, []);
 
   const genres = useMemo(
@@ -54,23 +79,53 @@ function HomePage() {
       .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))[0];
   }, [books]);
 
+  const isAuthor = member?.role === "AUTHOR" || member?.role === "ADMIN";
+  const showAuthorHome = isAuthor;
+
   return (
     <>
-      <section className="hero">
+      <section className={`hero ${showAuthorHome ? "hero-author" : "hero-reader"}`}>
         <div className="container hero-content">
-          <p className="eyebrow">CREATE YOUR BOOK COVER</p>
-          <h1>
-            책의 분위기를 담은
-            <br />
-            나만의 표지를 완성하세요.
-          </h1>
-          <p className="hero-copy">
-            작품의 감성과 어울리는 새로운 표지 디자인을<br />
-            지금 바로 만나보세요.
-          </p>
-          <Link className="button button-accent hero-button" to="/create">
-            새 도서 등록하기
-          </Link>
+          {showAuthorHome ? (
+            <>
+              <p className="eyebrow">AUTHOR STUDIO</p>
+              <h1>
+                책의 분위기를 담은
+                <br />
+                나만의 표지를 완성하세요.
+              </h1>
+              <p className="hero-copy">
+                저자 권한으로 도서를 등록하고 OpenAI 표지 생성까지 이어서 진행합니다.
+              </p>
+              <div className="hero-actions">
+                <Link className="button button-accent hero-button" to="/create">
+                  새 도서 등록하기
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="eyebrow">AI BOOK COLLECTION</p>
+              <h1>
+                마음에 드는 책을
+                <br />
+                발견하고 이야기하세요.
+              </h1>
+              <p className="hero-copy">
+                책을 둘러보고 댓글로 감상을 남겨보세요. 저자 신청 후에는 직접 도서를 등록할 수 있습니다.
+              </p>
+              <div className="hero-actions">
+                <Link className="button button-primary" to="/mypage">
+                  {member ? "저자 신청하기" : "My Page 보기"}
+                </Link>
+                {!member && (
+                  <a className="button button-secondary" href="/oauth2/authorization/google">
+                    Google 로그인
+                  </a>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </section>
 

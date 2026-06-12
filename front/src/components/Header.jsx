@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { getCurrentMember, requestAuthorRole } from "@/api/authApi";
+import { emitMemberChange } from "@/components/DemoToolbar";
+import logoMark from "@/assets/logo.svg";
 
 function Header() {
   const [member, setMember] = useState(null);
@@ -19,13 +21,26 @@ function Header() {
     }
 
     loadMember();
+
+    const handleMemberChange = (event) => {
+      setMember(event.detail?.member ?? null);
+      setLoadingMember(false);
+    };
+
+    window.addEventListener("member-state-change", handleMemberChange);
+
+    return () => {
+      window.removeEventListener("member-state-change", handleMemberChange);
+    };
   }, []);
 
   const handleAuthorRequest = async () => {
     try {
       setRequestingAuthor(true);
       await requestAuthorRole();
-      setMember(await getCurrentMember());
+      const updatedMember = await getCurrentMember();
+      setMember(updatedMember);
+      emitMemberChange(updatedMember);
     } finally {
       setRequestingAuthor(false);
     }
@@ -35,7 +50,9 @@ function Header() {
     <header className="site-header">
       <div className="container header-inner">
         <Link className="brand" to="/" aria-label="책부침 홈">
-          <span className="brand-mark">AI</span>
+          <span className="brand-mark" aria-hidden="true">
+            <img src={logoMark} alt="" />
+          </span>
           <span>
             <strong>책부침</strong>
             <small>AI Cover Library</small>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { getCurrentMember } from "@/api/authApi";
 import { generateCover } from "@/api/coverApi";
 import { getBookById, updateBook } from "@/api/bookApi";
 import BookCover from "@/components/BookCover";
@@ -70,6 +71,8 @@ function BookCoverPage({ mode }) {
   const [book, setBook] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [generatedUrl, setGeneratedUrl] = useState("");
+  const [member, setMember] = useState(null);
+  const [loadingMember, setLoadingMember] = useState(true);
   const [status, setStatus] = useState("idle");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -87,6 +90,20 @@ function BookCoverPage({ mode }) {
 
     loadBook();
   }, [id]);
+
+  useEffect(() => {
+    async function loadMember() {
+      try {
+        setMember(await getCurrentMember());
+      } catch {
+        setMember(null);
+      } finally {
+        setLoadingMember(false);
+      }
+    }
+
+    loadMember();
+  }, []);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -127,7 +144,18 @@ function BookCoverPage({ mode }) {
     }
   };
 
-  if (!book && !error) return <div className="container page-state">도서 정보를 불러오는 중입니다.</div>;
+  const canGenerateCover = member?.role === "AUTHOR" || member?.role === "ADMIN";
+
+  if ((!book && !error) || loadingMember) return <div className="container page-state">도서 정보와 권한을 확인하는 중입니다.</div>;
+  if (!canGenerateCover) {
+    return (
+      <div className="container page-state">
+        <h1>저자 권한이 필요합니다</h1>
+        <p>AI 표지 생성은 저자 또는 관리자만 이용할 수 있습니다.</p>
+        <Link className="button button-primary" to="/mypage">My Page로 이동</Link>
+      </div>
+    );
+  }
   if (!book) {
     return (
       <div className="container page-state error">

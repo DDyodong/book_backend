@@ -1,12 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getCurrentMember } from "@/api/authApi";
 import { createBook } from "@/api/bookApi";
 import BookForm from "@/components/BookForm";
 
 function BookCreatePage() {
   const navigate = useNavigate();
+  const [member, setMember] = useState(null);
+  const [loadingMember, setLoadingMember] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadMember() {
+      try {
+        setMember(await getCurrentMember());
+      } catch {
+        setMember(null);
+      } finally {
+        setLoadingMember(false);
+      }
+    }
+
+    loadMember();
+  }, []);
 
   const handleCreate = async (formData) => {
     try {
@@ -19,6 +36,22 @@ function BookCreatePage() {
       setSubmitting(false);
     }
   };
+
+  const canCreateBook = member?.role === "AUTHOR" || member?.role === "ADMIN";
+
+  if (loadingMember) {
+    return <div className="container page-state">권한을 확인하는 중입니다.</div>;
+  }
+
+  if (!canCreateBook) {
+    return (
+      <section className="container page-state">
+        <h1>저자 권한이 필요합니다</h1>
+        <p>도서 등록은 저자 또는 관리자만 이용할 수 있습니다.</p>
+        <Link className="button button-primary" to="/mypage">My Page로 이동</Link>
+      </section>
+    );
+  }
 
   return (
     <section className="container page-section form-page">
