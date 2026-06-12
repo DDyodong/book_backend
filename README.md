@@ -13,6 +13,45 @@ AI를 활용해 도서 표지를 생성할 수 있는 독서 커뮤니티 서비
 - 좋아요 및 댓글 기능
 - 마이페이지 기반 개인 도서 관리
 > React + Spring Boot + H2 Database + OpenAI + Google OAuth2
+---
+
+# 👨‍💻 기술 스택
+
+### Frontend
+
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+
+### Backend
+
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?logo=springsecurity&logoColor=white)
+![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?logo=spring&logoColor=white)
+
+### Database
+
+![H2 Database](https://img.shields.io/badge/H2_Database-09476B?logo=h2&logoColor=white)
+
+### AI
+
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?logo=openai&logoColor=white)
+
+### Authentication
+
+![Google OAuth2](https://img.shields.io/badge/Google_OAuth2-4285F4?logo=google&logoColor=white)
+
+---
+
+# 👥 팀 구성 및 역할 (R&R)
+
+| 프로젝트 수행 역할 | 담당자 | 설명 |
+|------------------|--------|------|
+| PM / 기획 | 권민근 | ERD 설계, API 정의서 작성, README 작성, 발표 자료 준비, 통합 이슈 추적 |
+| 백엔드 개발 (1) | 박지웅 | Book Entity 작성, BookRepository 구현, H2 콘솔 확인, Lombok 적용 |
+| 백엔드 개발 (2) | 박승원, 이동건 | BookService 구현, 비즈니스 로직 작성, 예외 처리, @Transactional 적용 |
+| 백엔드 개발 (3) | 김민성 | BookController 구현, CRUD API 개발, Validation 적용, Postman 테스트 |
+| 통합 · 예외 처리 | 강혜원, 유승찬 | WebConfig(CORS), GlobalExceptionHandler, 통합 테스트, 트러블슈팅 |
+| AI · Frontend 연동 | 정다영 | Frontend 코드 분석, API 연동, OpenAI 표지 생성 기능 구현, E2E 시연 준비 |
 
 ---
 # ✨ 서비스 미리보기
@@ -270,31 +309,4 @@ http://localhost:8080/login/oauth2/code/google
 * [ ] 댓글 작성/수정/삭제가 DB에 정상 반영되는가?
 * [ ] H2 Console에서 데이터 확인이 가능한가?
 
----
 
-# 👨‍💻 기술 스택
-
-### Frontend
-
-* React 
-* Vite
-* Axios
-
-### Backend
-
-* Spring Boot
-* Spring Security
-* Spring Data JPA
-* OAuth2 Client
-
-### Database
-
-* H2 Database
-
-### AI
-
-* OpenAI API
-
-### Authentication
-
-* Google OAuth2
