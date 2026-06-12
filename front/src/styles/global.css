@@ -227,8 +227,8 @@ p {
 
 .brand-mark {
   display: grid;
-  width: 43px;
-  height: 43px;
+  width: 70px;
+  height: 70px;
   place-items: center;
   border-radius: 13px;
   overflow: hidden;

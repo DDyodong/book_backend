@@ -140,6 +140,7 @@ function MyPage() {
               <ProfileAvatar member={member} />
             </div>
             <div className="profile-info">
+              <br></br>
               <h3>{member.nickname || member.email}</h3>
               <p>{member.email}</p>
               <div className="profile-meta">
